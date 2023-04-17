@@ -37,7 +37,7 @@
 
   <div id="info">
     <p>CG: Planet Builder<br>
-       14268902 - Erencan Pelin</p>
+      14268902 - Erencan Pelin</p>
   </div>
 
   <script type="importmap">
@@ -51,75 +51,215 @@
   <script type="module">
 
     import * as THREE from 'three';
-    import { Planet } from './build/planet.js';
     import { OrbitControls } from './build/controls/OrbitControls.js';
     import { PLYLoader } from './build/loaders/PLYLoader.js';
+    import { FBXLoader } from './build/loaders/FBXLoader.js';
 
     var scene = new THREE.Scene();
     var renderer = new THREE.WebGLRenderer();
+    renderer.shadowMap.enabled = true;
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-
     document.body.appendChild(renderer.domElement);
 
     var ratio = window.innerWidth / window.innerHeight;
     var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
-    camera.position.set(0, 0, 20);
+    camera.position.set(0, 70, 100);
     camera.lookAt(0, 0, 1);
-
-    //create planet
-    scene.add(new Planet(10, 20));
+    camera.layers.enable(1);
 
     var controls = new OrbitControls(camera, renderer.domElement);
 
-    var cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.5);
-    camera.add(cameralight);
-    scene.add(camera);
+    // var cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.5);
+    //   camera.add(cameralight);
+    var pivot = new THREE.Mesh();
+    pivot.add(camera);
+    scene.add(pivot);
 
-    var ambientlight = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 0.2);
+    var light = new THREE.DirectionalLight(new THREE.Color(1, 1, 0.7), 1.5);
+    light.position.set(100, 100, 100);
+    light.shadow.mapSize.x = 2048;
+    light.shadow.mapSize.y = 2048;
+
+    var d = 50;
+    light.shadow.camera.top = d;
+    light.shadow.camera.bottom = -d;
+
+    light.shadow.camera.left = -d;
+    light.shadow.camera.right = d;
+    light.shadow.camera.near = 0.05;
+    light.shadow.camera.far = 1000;
+    light.shadow.normalBias = 1;
+    light.castShadow = true;
+    scene.add(light);
+    //  scene.add( new THREE.CameraHelper( light.shadow.camera ) );
+
+    var ambientlight = new THREE.AmbientLight(new THREE.Color(.5, .5, 1), 0.5);
     scene.add(ambientlight);
 
-    //MESH LOADING
-    /*    var loader = new PLYLoader();
-       var mesh = null;
-       loader.load('models/bunny.ply', function (geometry) {
-         geometry.computeVertexNormals();
-         geometry.computeBoundingBox();
-   
-         var center = new THREE.Vector3();
-         var size = new THREE.Vector3();
-         geometry.boundingBox.getCenter(center);
-         geometry.boundingBox.getSize(size);
-         var min = geometry.boundingBox.min;
-   
-         var sca = new THREE.Matrix4();
-         var tra = new THREE.Matrix4();
-   
-         var ScaleFact = 5 / size.length();
-         sca.makeScale(ScaleFact, ScaleFact, ScaleFact);
-         tra.makeTranslation(-center.x, -center.y, -min.z);
-   
-         var material = new THREE.MeshPhongMaterial();
-         material.color = new THREE.Color(0.9, 0.9, 0.9);
-         material.shininess = 100;
-         mesh = new THREE.Mesh(geometry, material);
-   
-         mesh.applyMatrix4(tra);
-         mesh.applyMatrix4(sca);
-   
-         mesh.name = "loaded_mesh";
-   
-         scene.add(mesh);
-       }); */
 
+    var groundPlane = new THREE.CylinderGeometry(50, 50, 50, 50);
+    var groundMat = new THREE.MeshStandardMaterial();
+    groundMat.color = new THREE.Color(0.4, 0.8, 0.39);
+    var groundObj = new THREE.Mesh(groundPlane, groundMat);
+    groundObj.castShadow = true;
+    groundObj.receiveShadow = true;
+    groundObj.position.set(0, -0.05, 0);
+    groundObj.scale.set(1, .01, 1);
+    scene.add(groundObj);
+
+    var buildings = [];
+    var fbxLoader = new FBXLoader();
+
+    fbxLoader.load(
+      'models/Models/Building1_Ground.fbx',
+      (object) => {
+        object.traverse(function (child) {
+          if (child instanceof THREE.Mesh) {
+            const texture = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_AlbedoTransparency.png");
+            const normal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_Normal.png");
+            const metal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_MetallicSmoothness.png");
+            const material = new THREE.MeshPhongMaterial();
+            material.color = new THREE.Color(1, 1, 1);
+            material.shininess = 1000;
+            material.map = texture;
+            material.reflectivity = 1;
+            material.metalnessMap = metal;
+            material.specularMap = metal;
+            material.emissive = new THREE.Color(1, 1, 0.5);
+            material.emissiveMap = metal;
+            material.emissiveIntensity = 0;
+            material.metalness = .2;
+            material.normalMap = normal;
+            child.material = material;
+            child.position.set(0, 0, 0);
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        object.castShadow = true;
+        object.receiveShadow = true;
+        object.scale.set(.01, .01, .01)
+        scene.add(object)
+        buildings.push(object);
+      },
+    );
+    fbxLoader.load(
+      'models/Models/Building1_LevelA.fbx',
+      (object) => {
+        object.traverse(function (child) {
+          if (child instanceof THREE.Mesh) {
+            const texture = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_AlbedoTransparency.png");
+            const normal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_Normal.png");
+            const metal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_MetallicSmoothness.png");
+            const material = new THREE.MeshPhongMaterial();
+            material.color = new THREE.Color(1, 1, 1);
+            material.shininess = 1000;
+            material.map = texture;
+            material.reflectivity = 1;
+            material.metalnessMap = metal;
+            material.specularMap = metal;
+            material.emissive = new THREE.Color(1, 1, 0.5);
+            material.emissiveMap = metal;
+            material.emissiveIntensity = 0;
+            material.metalness = .2;
+            material.normalMap = normal;
+            child.material = material;
+            child.position.set(0, 0, 0);
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        object.castShadow = true;
+        object.receiveShadow = true;
+        object.scale.set(.01, .01, .01)
+        object.position.set(0, 4, 0);
+        scene.add(object)
+        buildings.push(object);
+      },
+    );
+    fbxLoader.load(
+      'models/Models/Building1_Roof.fbx',
+      (object) => {
+        object.traverse(function (child) {
+          if (child instanceof THREE.Mesh) {
+            const texture = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_AlbedoTransparency.png");
+            const normal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_Normal.png");
+            const metal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_MetallicSmoothness.png");
+            const material = new THREE.MeshPhongMaterial();
+            material.color = new THREE.Color(1, 1, 1);
+            material.shininess = 1000;
+            material.map = texture;
+            material.reflectivity = 1;
+            material.metalnessMap = metal;
+            material.specularMap = metal;
+            material.emissive = new THREE.Color(1, 1, 0.5);
+            material.emissiveMap = metal;
+            material.emissiveIntensity = 0;
+            material.metalness = .2;
+            material.normalMap = normal;
+            child.material = material;
+            child.position.set(0, 0, 0);
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        object.castShadow = true;
+        object.receiveShadow = true;
+        object.scale.set(.01, .01, .01)
+        object.position.set(0, 8, 0);
+
+        scene.add(object)
+        buildings.push(object);
+      },
+    );
+
+    const placerGeom = new THREE.BoxGeometry();
+    const placerMat = new THREE.MeshBasicMaterial();
+    placerMat.color = new THREE.Color(0,.7,.9);
+    const placerObj = new THREE.Mesh(placerGeom, placerMat);
+    placerObj.scale.set(8, 4, 8);
+    placerObj.layers.set(1);
+    scene.add(placerObj);
+
+    var raycaster = new THREE.Raycaster();
     var MyUpdateLoop = function () {
       renderer.render(scene, camera);
+
+      pivot.rotation.y += 0.001;
+
+      light.position.x = 450 * Math.sin(Date.now() / 8000);
+      light.position.y = 450 * Math.cos(Date.now() / 8000);
+
+      for (let i = 0; i < buildings.length; i++) {
+        buildings[i].traverse(function (child) {
+          if (child instanceof THREE.Mesh) {
+            child.material.emissiveIntensity = (light.position.y < 100);
+          }
+        });
+      }
+
       requestAnimationFrame(MyUpdateLoop);
     };
 
     requestAnimationFrame(MyUpdateLoop);
 
-    var raycaster = new THREE.Raycaster();
+    function onDocumentMouseMove(event) {
+      var mouse = new THREE.Vector2;
+      mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+      mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+      raycaster.layers.set(0);
+      raycaster.setFromCamera(mouse, camera);
+
+      var intersects = raycaster.intersectObjects(scene.children, false);
+
+      if (intersects.length > 0) {
+        placerObj.position.set(Math.round(intersects[0].point.x / 8) * 8, intersects[0].point.y, Math.round(intersects[0].point.z / 8) * 8);
+      }
+    }
 
     var selectedObj = false;
 
@@ -153,6 +293,7 @@
 
     // when the mouse is clicked, call the given function
     document.addEventListener('mousedown', onDocumentMouseDown, false);
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
 
     //this function is called when the window is resized
     var MyResize = function () {
