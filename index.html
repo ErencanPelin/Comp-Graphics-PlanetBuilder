@@ -109,116 +109,133 @@
     scene.add(groundObj);
 
     var buildings = [];
+    var buildingPoints = [];
     var fbxLoader = new FBXLoader();
 
-    fbxLoader.load(
-      'models/Models/Building1_Ground.fbx',
-      (object) => {
-        object.traverse(function (child) {
-          if (child instanceof THREE.Mesh) {
-            const texture = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_AlbedoTransparency.png");
-            const normal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_Normal.png");
-            const metal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_MetallicSmoothness.png");
-            const material = new THREE.MeshPhongMaterial();
-            material.color = new THREE.Color(1, 1, 1);
-            material.shininess = 1000;
-            material.map = texture;
-            material.reflectivity = 1;
-            material.metalnessMap = metal;
-            material.specularMap = metal;
-            material.emissive = new THREE.Color(1, 1, 0.5);
-            material.emissiveMap = metal;
-            material.emissiveIntensity = 0;
-            material.metalness = .2;
-            material.normalMap = normal;
-            child.material = material;
-            child.position.set(0, 0, 0);
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        object.castShadow = true;
-        object.receiveShadow = true;
-        object.scale.set(.01, .01, .01)
-        scene.add(object)
-        buildings.push(object);
-      },
-    );
-    fbxLoader.load(
-      'models/Models/Building1_LevelA.fbx',
-      (object) => {
-        object.traverse(function (child) {
-          if (child instanceof THREE.Mesh) {
-            const texture = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_AlbedoTransparency.png");
-            const normal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_Normal.png");
-            const metal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_MetallicSmoothness.png");
-            const material = new THREE.MeshPhongMaterial();
-            material.color = new THREE.Color(1, 1, 1);
-            material.shininess = 1000;
-            material.map = texture;
-            material.reflectivity = 1;
-            material.metalnessMap = metal;
-            material.specularMap = metal;
-            material.emissive = new THREE.Color(1, 1, 0.5);
-            material.emissiveMap = metal;
-            material.emissiveIntensity = 0;
-            material.metalness = .2;
-            material.normalMap = normal;
-            child.material = material;
-            child.position.set(0, 0, 0);
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
+    function LoadGround(position) {
+      fbxLoader.load(
+        'models/Models/Building1_Ground.fbx',
+        (object) => {
+          object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+              const texture = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_AlbedoTransparency.png");
+              const normal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_Normal.png");
+              const metal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_MetallicSmoothness.png");
+              const material = new THREE.MeshPhongMaterial();
+              material.color = new THREE.Color(1, 1, 1);
+              material.shininess = 1000;
+              material.map = texture;
+              material.reflectivity = 1;
+              material.metalnessMap = metal;
+              material.specularMap = metal;
+              material.emissive = new THREE.Color(1, 1, 0.5);
+              material.emissiveMap = metal;
+              material.emissiveIntensity = 0;
+              material.metalness = .2;
+              material.normalMap = normal;
+              child.material = material;
+              child.position.set(0, 0, 0);
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          object.castShadow = true;
+          object.receiveShadow = true;
+          object.scale.set(.01, .01, .01);
+          scene.add(object)
+          buildings.push(object);
+          buildingPoints.push(object.position);
+          object.position.set(position.x, position.y, position.z);
+          return object;
+        },
+      );
+    }
 
-        object.castShadow = true;
-        object.receiveShadow = true;
-        object.scale.set(.01, .01, .01)
-        object.position.set(0, 4, 0);
-        scene.add(object)
-        buildings.push(object);
-      },
-    );
-    fbxLoader.load(
-      'models/Models/Building1_Roof.fbx',
-      (object) => {
-        object.traverse(function (child) {
-          if (child instanceof THREE.Mesh) {
-            const texture = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_AlbedoTransparency.png");
-            const normal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_Normal.png");
-            const metal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_MetallicSmoothness.png");
-            const material = new THREE.MeshPhongMaterial();
-            material.color = new THREE.Color(1, 1, 1);
-            material.shininess = 1000;
-            material.map = texture;
-            material.reflectivity = 1;
-            material.metalnessMap = metal;
-            material.specularMap = metal;
-            material.emissive = new THREE.Color(1, 1, 0.5);
-            material.emissiveMap = metal;
-            material.emissiveIntensity = 0;
-            material.metalness = .2;
-            material.normalMap = normal;
-            child.material = material;
-            child.position.set(0, 0, 0);
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
+    function LoadLevel(position) {
+      fbxLoader.load(
+        'models/Models/Building1_LevelA.fbx',
+        (object) => {
+          object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+              const texture = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_AlbedoTransparency.png");
+              const normal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_Normal.png");
+              const metal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_MetallicSmoothness.png");
+              const material = new THREE.MeshPhongMaterial();
+              material.color = new THREE.Color(1, 1, 1);
+              material.shininess = 1000;
+              material.map = texture;
+              material.reflectivity = 1;
+              material.metalnessMap = metal;
+              material.specularMap = metal;
+              material.emissive = new THREE.Color(1, 1, 0.5);
+              material.emissiveMap = metal;
+              material.emissiveIntensity = 0;
+              material.metalness = .2;
+              material.normalMap = normal;
+              child.material = material;
+              object.position.set(position);
+              child.castShadow = true;
+              child.position.set(0,0,0);
+              child.receiveShadow = true;
+            }
+          });
 
-        object.castShadow = true;
-        object.receiveShadow = true;
-        object.scale.set(.01, .01, .01)
-        object.position.set(0, 8, 0);
+          object.castShadow = true;
+          object.receiveShadow = true;
+          object.scale.set(.01, .01, .01)
+          object.position.set(position.x, position.y, position.z);
+          scene.add(object)
+          buildings.push(object);
+          buildingPoints.push(object.position);
+          return object;
+        },
+      );
+    }
 
-        scene.add(object)
-        buildings.push(object);
-      },
-    );
+    function LoadRoof(position) {
+      fbxLoader.load(
+        'models/Models/Building1_Roof.fbx',
+        (object) => {
+          object.traverse(function (child) {
+            if (child instanceof THREE.Mesh) {
+              const texture = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_AlbedoTransparency.png");
+              const normal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_Normal.png");
+              const metal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_MetallicSmoothness.png");
+              const material = new THREE.MeshPhongMaterial();
+              material.color = new THREE.Color(1, 1, 1);
+              material.shininess = 1000;
+              material.map = texture;
+              material.reflectivity = 1;
+              material.metalnessMap = metal;
+              material.specularMap = metal;
+              material.emissive = new THREE.Color(1, 1, 0.5);
+              material.emissiveMap = metal;
+              material.emissiveIntensity = 0;
+              material.metalness = .2;
+              material.normalMap = normal;
+              child.material = material;
+              child.position.set(0, 0, 0);
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+
+          object.castShadow = true;
+          object.receiveShadow = true;
+          object.scale.set(.01, .01, .01)
+          object.position.set(position.x, position.y, position.z);
+
+          scene.add(object)
+          buildings.push(object);
+          buildingPoints.push(object.position);
+          return object;
+        },
+      );
+    }
 
     const placerGeom = new THREE.BoxGeometry();
     const placerMat = new THREE.MeshBasicMaterial();
-    placerMat.color = new THREE.Color(0,.7,.9);
+    placerMat.color = new THREE.Color(0, .7, .9);
     const placerObj = new THREE.Mesh(placerGeom, placerMat);
     placerObj.scale.set(8, 4, 8);
     placerObj.layers.set(1);
@@ -257,14 +274,42 @@
       var intersects = raycaster.intersectObjects(scene.children, false);
 
       if (intersects.length > 0) {
-        placerObj.position.set(Math.round(intersects[0].point.x / 8) * 8, intersects[0].point.y, Math.round(intersects[0].point.z / 8) * 8);
+        placerObj.position.set(Math.round(intersects[0].point.x / 8) * 8, intersects[0].point.y + 2, Math.round(intersects[0].point.z / 8) * 8);
+        placerPos = new THREE.Vector3().copy(placerObj.position).sub(new THREE.Vector3(0, 2, 0)).round();
+
+        if (!containsPoint(placerPos) && placerPos.distanceTo(new THREE.Vector3()) < 45) {
+          canBuild = true;
+          placerMat.color = new THREE.Color(0, .7, .9);
+        }
+        else {
+          canBuild = false;
+          placerMat.color = new THREE.Color(1, 0, 0);
+        }
       }
     }
 
+    var placerPos = new THREE.Vector3();
+
+    function containsPoint(point) {
+      for (let i = 0; i < buildingPoints.length; i++) {
+        if (buildingPoints[i].equals(point)) {
+          return true;;
+        }
+      }
+      return false;
+    }
     var selectedObj = false;
 
+    var canBuild = false;
     function onDocumentMouseDown(event) {
+      if (!canBuild) return;
+
       console.log("pressed!");
+
+      //place a new building at next available floor
+      console.log(placerPos);
+      var o = LoadRoof(placerPos);
+
       /* var mouse = new THREE.Vector2;
       mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
       mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
