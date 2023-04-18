@@ -1,3 +1,5 @@
 build/three.module.js
 build/libs
 build/curves
+build/controls
+build/loaders
