@@ -124,8 +124,7 @@
     waterObj.scale.set(1, .01, 1);
     scene.add(waterObj);
 
-    var buildings = [];
-    var buildingPoints = [];
+    const buildings = [];
 
     //setup placer/selector object
     const placerGeom = new THREE.BoxGeometry();
@@ -160,7 +159,7 @@
       for (let i = 0; i < buildings.length; i++) {
         buildings[i].traverse(function (child) {
           if (child instanceof THREE.Mesh) {
-            child.material.emissiveIntensity = (light.position.y < 100);
+            child.material.emissiveIntensity = light.position.y < 100;
           }
         });
       }
