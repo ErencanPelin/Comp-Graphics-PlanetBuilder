@@ -103,6 +103,26 @@
     groundObj.position.set(0, -0.05, 0);
     groundObj.scale.set(1, .01, 1);
     scene.add(groundObj);
+    const islandPlane = new THREE.CylinderGeometry(70, 70, 70, 70);
+    const islandMat = new THREE.MeshStandardMaterial();
+    const islandObj = new THREE.Mesh(islandPlane, islandMat);
+    islandMat.color = new THREE.Color(1, 0.8, 0.39);
+    islandObj.castShadow = true;
+    islandObj.receiveShadow = true;
+    islandObj.position.set(0, -1, 0);
+    islandObj.scale.set(1, .01, 1);
+    scene.add(islandObj);
+    const waterPlane = new THREE.CylinderGeometry(70, 70, 70, 70);
+    const waterMat = new THREE.MeshStandardMaterial();
+    const waterObj = new THREE.Mesh(waterPlane, waterMat);
+    waterMat.transparent = true;
+    waterMat.opacity = 0.8;
+    waterMat.color = new THREE.Color(0, .7, .9);
+    waterObj.castShadow = true;
+    waterObj.receiveShadow = true;
+    waterObj.position.set(0, -0.5, 0);
+    waterObj.scale.set(1, .01, 1);
+    scene.add(waterObj);
 
     var buildings = [];
     var buildingPoints = [];
