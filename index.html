@@ -51,40 +51,39 @@
   <script type="module">
 
     import * as THREE from 'three';
+    import { buildingModels } from './build/buildings.js';
     import { OrbitControls } from './build/controls/OrbitControls.js';
-    import { PLYLoader } from './build/loaders/PLYLoader.js';
-    import { FBXLoader } from './build/loaders/FBXLoader.js';
 
-    var scene = new THREE.Scene();
-    var renderer = new THREE.WebGLRenderer();
+    //init
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer();
     renderer.shadowMap.enabled = true;
-
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    var ratio = window.innerWidth / window.innerHeight;
-    var camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+    //setup camera
+    const ratio = window.innerWidth / window.innerHeight;
+    const camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 1000);
+    const pivot = new THREE.Mesh();
     camera.position.set(0, 70, 100);
     camera.lookAt(0, 0, 1);
     camera.layers.enable(1);
-
-    var controls = new OrbitControls(camera, renderer.domElement);
-
-    // var cameralight = new THREE.PointLight(new THREE.Color(1, 1, 1), 0.5);
-    //   camera.add(cameralight);
-    var pivot = new THREE.Mesh();
+    //setup camera pivot
     pivot.add(camera);
     scene.add(pivot);
 
-    var light = new THREE.DirectionalLight(new THREE.Color(1, 1, 0.7), 1.5);
+    //controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+
+    //lighting
+    const light = new THREE.DirectionalLight(new THREE.Color(1, 1, 0.7), 1.5);
+    const ambientlight = new THREE.AmbientLight(new THREE.Color(.5, .5, 1), 0.5);
+    const d = 50;
     light.position.set(100, 100, 100);
     light.shadow.mapSize.x = 2048;
     light.shadow.mapSize.y = 2048;
-
-    var d = 50;
     light.shadow.camera.top = d;
     light.shadow.camera.bottom = -d;
-
     light.shadow.camera.left = -d;
     light.shadow.camera.right = d;
     light.shadow.camera.near = 0.05;
@@ -92,16 +91,13 @@
     light.shadow.normalBias = 1;
     light.castShadow = true;
     scene.add(light);
-    //  scene.add( new THREE.CameraHelper( light.shadow.camera ) );
-
-    var ambientlight = new THREE.AmbientLight(new THREE.Color(.5, .5, 1), 0.5);
     scene.add(ambientlight);
 
-
-    var groundPlane = new THREE.CylinderGeometry(50, 50, 50, 50);
-    var groundMat = new THREE.MeshStandardMaterial();
+    //ground plane
+    const groundPlane = new THREE.CylinderGeometry(50, 50, 50, 50);
+    const groundMat = new THREE.MeshStandardMaterial();
+    const groundObj = new THREE.Mesh(groundPlane, groundMat);
     groundMat.color = new THREE.Color(0.4, 0.8, 0.39);
-    var groundObj = new THREE.Mesh(groundPlane, groundMat);
     groundObj.castShadow = true;
     groundObj.receiveShadow = true;
     groundObj.position.set(0, -0.05, 0);
@@ -110,146 +106,37 @@
 
     var buildings = [];
     var buildingPoints = [];
-    var fbxLoader = new FBXLoader();
 
-    function LoadGround(position) {
-      fbxLoader.load(
-        'models/Models/Building1_Ground.fbx',
-        (object) => {
-          object.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-              const texture = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_AlbedoTransparency.png");
-              const normal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_Normal.png");
-              const metal = new THREE.TextureLoader().load("models/Textures/Building/Ground/Building1_Ground_DefaultMaterial_MetallicSmoothness.png");
-              const material = new THREE.MeshPhongMaterial();
-              material.color = new THREE.Color(1, 1, 1);
-              material.shininess = 1000;
-              material.map = texture;
-              material.reflectivity = 1;
-              material.metalnessMap = metal;
-              material.specularMap = metal;
-              material.emissive = new THREE.Color(1, 1, 0.5);
-              material.emissiveMap = metal;
-              material.emissiveIntensity = 0;
-              material.metalness = .2;
-              material.normalMap = normal;
-              child.material = material;
-              child.position.set(0, 0, 0);
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
-          });
-          object.castShadow = true;
-          object.receiveShadow = true;
-          object.scale.set(.01, .01, .01);
-          scene.add(object)
-          buildings.push(object);
-          buildingPoints.push(object.position);
-          object.position.set(position.x, position.y, position.z);
-          return object;
-        },
-      );
-    }
-
-    function LoadLevel(position) {
-      fbxLoader.load(
-        'models/Models/Building1_LevelA.fbx',
-        (object) => {
-          object.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-              const texture = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_AlbedoTransparency.png");
-              const normal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_Normal.png");
-              const metal = new THREE.TextureLoader().load("models/Textures/Building/LevelA/Building1_LevelA_DefaultMaterial_MetallicSmoothness.png");
-              const material = new THREE.MeshPhongMaterial();
-              material.color = new THREE.Color(1, 1, 1);
-              material.shininess = 1000;
-              material.map = texture;
-              material.reflectivity = 1;
-              material.metalnessMap = metal;
-              material.specularMap = metal;
-              material.emissive = new THREE.Color(1, 1, 0.5);
-              material.emissiveMap = metal;
-              material.emissiveIntensity = 0;
-              material.metalness = .2;
-              material.normalMap = normal;
-              child.material = material;
-              object.position.set(position);
-              child.castShadow = true;
-              child.position.set(0,0,0);
-              child.receiveShadow = true;
-            }
-          });
-
-          object.castShadow = true;
-          object.receiveShadow = true;
-          object.scale.set(.01, .01, .01)
-          object.position.set(position.x, position.y, position.z);
-          scene.add(object)
-          buildings.push(object);
-          buildingPoints.push(object.position);
-          return object;
-        },
-      );
-    }
-
-    function LoadRoof(position) {
-      fbxLoader.load(
-        'models/Models/Building1_Roof.fbx',
-        (object) => {
-          object.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-              const texture = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_AlbedoTransparency.png");
-              const normal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_Normal.png");
-              const metal = new THREE.TextureLoader().load("models/Textures/Building/Roof/Building1_Roof_DefaultMaterial_MetallicSmoothness.png");
-              const material = new THREE.MeshPhongMaterial();
-              material.color = new THREE.Color(1, 1, 1);
-              material.shininess = 1000;
-              material.map = texture;
-              material.reflectivity = 1;
-              material.metalnessMap = metal;
-              material.specularMap = metal;
-              material.emissive = new THREE.Color(1, 1, 0.5);
-              material.emissiveMap = metal;
-              material.emissiveIntensity = 0;
-              material.metalness = .2;
-              material.normalMap = normal;
-              child.material = material;
-              child.position.set(0, 0, 0);
-              child.castShadow = true;
-              child.receiveShadow = true;
-            }
-          });
-
-          object.castShadow = true;
-          object.receiveShadow = true;
-          object.scale.set(.01, .01, .01)
-          object.position.set(position.x, position.y, position.z);
-
-          scene.add(object)
-          buildings.push(object);
-          buildingPoints.push(object.position);
-          return object;
-        },
-      );
-    }
-
+    //setup placer/selector object
     const placerGeom = new THREE.BoxGeometry();
     const placerMat = new THREE.MeshBasicMaterial();
-    placerMat.color = new THREE.Color(0, .7, .9);
     const placerObj = new THREE.Mesh(placerGeom, placerMat);
+    placerMat.color = new THREE.Color(0, .7, .9);
+    placerMat.transparent = true;
+    placerMat.opacity = 0.5;
     placerObj.scale.set(8, 4, 8);
     placerObj.layers.set(1);
     scene.add(placerObj);
 
-    var raycaster = new THREE.Raycaster();
+    //setup raycaster
+    const raycaster = new THREE.Raycaster();
+    raycaster.layers.set(0);
+    const mouse = new THREE.Vector2();
+    let placerPos = new THREE.Vector3();
+    let canBuild = false;
+
+    //update loop
     var MyUpdateLoop = function () {
       renderer.render(scene, camera);
 
+      //slowly rotate the camera around the world
       pivot.rotation.y += 0.001;
 
+      //slowly rotate the light around the world for day/night cycle
       light.position.x = 450 * Math.sin(Date.now() / 8000);
       light.position.y = 450 * Math.cos(Date.now() / 8000);
 
+      //update each building's emissive materials
       for (let i = 0; i < buildings.length; i++) {
         buildings[i].traverse(function (child) {
           if (child instanceof THREE.Mesh) {
@@ -261,84 +148,106 @@
       requestAnimationFrame(MyUpdateLoop);
     };
 
+    //begin update loop
     requestAnimationFrame(MyUpdateLoop);
 
-    function onDocumentMouseMove(event) {
-      var mouse = new THREE.Vector2;
-      mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-      mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-      raycaster.layers.set(0);
-      raycaster.setFromCamera(mouse, camera);
-
-      var intersects = raycaster.intersectObjects(scene.children, false);
-
-      if (intersects.length > 0) {
-        placerObj.position.set(Math.round(intersects[0].point.x / 8) * 8, intersects[0].point.y + 2, Math.round(intersects[0].point.z / 8) * 8);
-        placerPos = new THREE.Vector3().copy(placerObj.position).sub(new THREE.Vector3(0, 2, 0)).round();
-
-        if (!containsPoint(placerPos) && placerPos.distanceTo(new THREE.Vector3()) < 45) {
-          canBuild = true;
-          placerMat.color = new THREE.Color(0, .7, .9);
-        }
-        else {
-          canBuild = false;
-          placerMat.color = new THREE.Color(1, 0, 0);
+    function canBuildFloor(point) {
+      for (let i = 0; i < 4 * 10; i += 4) {
+        if (!containsPoint(new THREE.Vector3(point.x, i, point.z))) {
+          return true;
         }
       }
+      return false;
     }
 
-    var placerPos = new THREE.Vector3();
-
+    //returns true if a building already exists at given point
     function containsPoint(point) {
-      for (let i = 0; i < buildingPoints.length; i++) {
-        if (buildingPoints[i].equals(point)) {
+      for (let i = 0; i < buildings.length; i++) {
+        if (buildings[i].position.equals(point)) {
           return true;;
         }
       }
       return false;
     }
-    var selectedObj = false;
 
-    var canBuild = false;
-    function onDocumentMouseDown(event) {
-      if (!canBuild) return;
+    function updatePlaceable() {
+      //update selector/placer color
+      if (canBuildFloor(placerPos) && placerPos.distanceTo(new THREE.Vector3()) < 45) {
+        canBuild = true;
+        placerMat.color = new THREE.Color(0, .7, .9);
+      }
+      else {
+        canBuild = false;
+        placerMat.color = new THREE.Color(1, 0, 0);
+      }
+    }
 
-      console.log("pressed!");
 
-      //place a new building at next available floor
-      console.log(placerPos);
-      var o = LoadRoof(placerPos);
-
-      /* var mouse = new THREE.Vector2;
+    //called whenever the mouse position changes
+    function onDocumentMouseMove(event) {
       mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
       mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
 
-      raycaster.setFromCamera(mouse, camera);
+      raycaster.setFromCamera(mouse, camera); //begin cast
 
-      var intersects = raycaster.intersectObjects(scene.children, false);
+      let intersects = raycaster.intersectObjects(scene.children, false); //obtain intersections
 
       if (intersects.length > 0) {
-        if ((intersects[0].object.name == "loaded_mesh") && (!selectedObj)) {
-          console.log("Selected!");
-          //var FaceI=intersects[ 0 ].face;
-          intersects[0].object.material.color = new THREE.Color(1, 0.5, 0.5);
-          selectedObj = true;
-        }
-        if ((intersects[0].object.name != "loaded_mesh") && (selectedObj)) {
-          mesh.material.color = new THREE.Color(0.9, 0.9, 0.9);
-          var pos = intersects[0].point;
-          console.log("Placed!");
-          mesh.position.x = pos.x;
-          mesh.position.y = pos.y;
-          selectedObj = false;
-        }
-      } */
+        //update placer position
+        placerObj.position.set(Math.round(intersects[0].point.x / 8) * 8, intersects[0].point.y + 2, Math.round(intersects[0].point.z / 8) * 8);
+        placerPos = new THREE.Vector3().copy(placerObj.position).sub(new THREE.Vector3(0, 2, 0)).round();
+
+        updatePlaceable();
+      }
     }
 
-    // when the mouse is clicked, call the given function
-    document.addEventListener('mousedown', onDocumentMouseDown, false);
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    //called when user clicks
+    function onDocumentMouseDown(event) {
+      if (event.button !== 2) return; //only place buildings when we right click
+      if (!canBuild) return;
+
+      console.log("built!");
+
+      //place a new building at next available floor
+      if (!containsPoint(placerPos)) {
+        let obj = buildingModels[0].clone();
+        obj.position.set(placerPos.x, placerPos.y, placerPos.z);
+        scene.add(obj);
+
+        let objRoof = buildingModels[2].clone();
+        objRoof.name = "roof";
+        objRoof.position.set(placerPos.x, placerPos.y + 4, placerPos.z);
+        scene.add(objRoof);
+
+        buildings.push(obj);
+        buildings.push(objRoof);
+      }
+      else { 
+        var objLevel;
+        //find next available floor
+        for (let i = 0; i < 4 * 10; i += 4) {
+          if (!containsPoint(new THREE.Vector3(placerPos.x, i, placerPos.z))) {
+            objLevel = buildingModels[1].clone();
+            console.log(i);
+            objLevel.position.set(placerPos.x, i, placerPos.z);
+            scene.add(objLevel);
+            break;
+          }
+        }
+
+        //remove old roof
+        for (let i = 0; i < buildings.length; i++){
+          if (buildings[i].position.equals(new THREE.Vector3().copy(objLevel.position).sub(new THREE.Vector3(0, 4, 0))) &&
+          buildings[i].name == "roof") {
+            buildings[i].position.add(new THREE.Vector3(0, 4, 0));
+          }
+        }
+
+        objLevel.position.sub(new THREE.Vector3(0, 4, 0));
+        buildings.push(objLevel);
+      }
+      updatePlaceable();
+    }
 
     //this function is called when the window is resized
     var MyResize = function () {
@@ -355,9 +264,14 @@
       //and finally render the scene again
       renderer.render(scene, camera);
     };
-    //link the resize of the window to the update of the camera
-    window.addEventListener('resize', MyResize);
 
+    //listeners
+    window.addEventListener('resize', MyResize);
+    document.addEventListener('mousedown', onDocumentMouseDown, false);
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+    //debugging
+    //scene.add( new THREE.CameraHelper( light.shadow.camera ) );
   </script>
 </body>
 
